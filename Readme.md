@@ -52,5 +52,5 @@ $ python sample.py -h
 ```
 command.
 
-Hopefully you can find some good data to play with using this model.
+Hopefully you can find some good data to play with using this model. Good luck!!
 
