@@ -36,7 +36,7 @@ In each training step the trainer will perform an rmsprop update using a mini-ba
 
 Once you have a model trained you can use `sample.py` to sample from it. If you have a model stored in `cv/model.p` then you can sample from it using the default parameters with the command
 ```bash
-$ python sample.py -d 'cv/model.p'
+$ python sample.py -m 'cv/model.p'
 ```
 This will sample 10 poems using the model you created. 
 
