@@ -62,7 +62,7 @@ class RNNClassifierTrainer(object):
     max_val=kwargs.get('max_val',-1)
     fappend=kwargs.get('fappend')
     iter_to_update=kwargs.get('iter_to_update',1)
-    dictionary=kwarts.get('dictionary')
+    dictionary=kwargs.get('dictionary')
     N = len(X)
     M = len(X_val_list)
     batch_val=True
@@ -76,7 +76,7 @@ class RNNClassifierTrainer(object):
       iterations_per_epoch = 1 # using GD
     num_iters = num_epochs * iterations_per_epoch
     epoch = 0
-    best_val_acc = 0.0
+    best_val_loss = 0.0
     best_model = {}
     loss_history = []
     train_acc_history = []
@@ -178,6 +178,7 @@ class RNNClassifierTrainer(object):
         # use all validation data if not batching
         if not batch_val:
           scores_val = loss_function(X_val, model=model,mask=val_mask,num_chars=val_chars)
+          val_loss = loss_function(X_val, y_val, model=model,mask=val_mask,num_chars=val_chars)[0]
           y_pred_val = np.argmax(scores_val, axis=-1)
           val_acc = np.mean(y_pred_val ==  y_val)
           val_acc_history.append(val_acc)
@@ -189,21 +190,22 @@ class RNNClassifierTrainer(object):
           #batch the validation sample
           X_val_mat,val_mask,val_num_chars,y_val_mat=prep.poem_batch_to_tensor(X_val_subset_list,y_val_subset_list)
           scores_val=loss_function(X_val_mat,model=model,mask=val_mask,num_chars=val_num_chars)
+          val_loss=loss_function(X_val_mat,y_val_mat,model=model,mask=val_mask,num_chars=val_num_chars)[0]
           y_pred_val=np.argmax(scores_val,axis=-1)
           val_acc=np.mean(y_pred_val==y_val_mat)
           val_acc_history.append(val_acc)    
         
         # keep track of the best model based on validation accuracy
-        if val_acc > best_val_acc and epoch>0:
+        if val_loss > best_val_loss and epoch>0:
           # make a copy of the model
-          best_val_acc = val_acc
+          best_val_loss = val_loss
           best_model = {}
           #add the dictionary for when we sample
           best_model['dictionary']=dictionary
           for p in model:
             best_model[p] = model[p].copy()
           #save the model if it is best
-          filename=os.path.join(checkpoint_output_dir,'checkpoint_%s_%.2f.p' % (fappend,scores_val))
+          filename=os.path.join(checkpoint_output_dir,'checkpoint_%s_%.2f.p' % (fappend,val_loss))
           print 'Saving epoch %s model to file' % epoch
           pickle.dump(best_model,open(filename,'wb'))    
 
@@ -213,7 +215,7 @@ class RNNClassifierTrainer(object):
                  % (epoch, num_epochs, cost, train_acc, val_acc, learning_rate))
 
     if verbose:
-      print 'finished optimization. best validation accuracy: %f' % (best_val_acc, )
+      print 'finished optimization. best validation loss: %f' % (best_val_loss)
     # return the best model and the training history statistics
     return best_model, loss_history, train_acc_history, val_acc_history
 

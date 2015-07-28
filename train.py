@@ -77,7 +77,7 @@ if __name__ == "__main__":
     
     parser.add_argument('-d', '--dataset', dest='dataset', default='haikus.csv', help='dataset: cvs filename of the poems inside the data directory')
     parser.add_argument('-o', '--checkpoint_output_directory', dest='checkpoint_output_dir', type=str, default='cv/', help='output directory to write checkpoints to')
-    parser.add_argument('--hidden_size', dest='hidden_size', type=int, default=256, help='size of hidden layer in RNNs')
+    parser.add_argument('--hidden_size', dest='hidden_size', type=int, default=128, help='size of hidden layer in RNNs')
     parser.add_argument('-l', '--learning_rate', dest='learning_rate', type=float, default=1e-3, help='solver learning rate')
     parser.add_argument('-c', '--regc', dest='regc', type=float, default=1e-8, help='regularization strength')
     parser.add_argument('-m', '--max_epochs', dest='max_epochs', type=int, default=50, help='number of epochs to train for')
