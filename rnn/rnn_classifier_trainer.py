@@ -4,7 +4,7 @@ import time
 import cPickle as pickle
 import os
 
-# this came from Andrej Karpathy's Neural network class http://cs231n.stanford.edu with only minor modifications
+# this came from Fei-Fei Li and Andrej Karpathy's Convolutional Neural network class http://cs231n.stanford.edu with only minor modifications
 class RNNClassifierTrainer(object):
   """ The trainer class performs SGD with momentum on a cost function """
   def __init__(self):
@@ -62,7 +62,9 @@ class RNNClassifierTrainer(object):
     max_val=kwargs.get('max_val',-1)
     fappend=kwargs.get('fappend')
     iter_to_update=kwargs.get('iter_to_update',1)
-    dictionary=kwargs.get('dictionary')
+    #unpack dictionary and strip it from the model
+    dictionary=model['dictionary']
+    model={k:v for k,v in model.iteritems() if k!='dictionary'}
     N = len(X)
     M = len(X_val_list)
     batch_val=True
@@ -76,7 +78,7 @@ class RNNClassifierTrainer(object):
       iterations_per_epoch = 1 # using GD
     num_iters = num_epochs * iterations_per_epoch
     epoch = 0
-    best_val_loss = 0.0
+    best_val_loss = 100.0 # probably loss will never be this large
     best_model = {}
     loss_history = []
     train_acc_history = []
@@ -103,7 +105,7 @@ class RNNClassifierTrainer(object):
       X_batch,batch_mask,batch_num_chars,y_batch=prep.poem_batch_to_tensor(X_batch_list,y_batch_list)
 
       # evaluate cost and gradient
-      #print 'computing cost'  
+      #print 'computing loss'  
       cost, grads = loss_function(X_batch, y_batch,batch_mask, model,batch_num_chars, reg,drop_prob1=drop_prob1,drop_prob2=drop_prob2)
       loss_history.append(cost)
 
@@ -127,16 +129,10 @@ class RNNClassifierTrainer(object):
           smoothing=1e-8  
           if not p in self.step_cache: 
             self.step_cache[p] = np.zeros(grads[p].shape)
-          #dx = np.zeros_like(grads[p]) # you can remove this after
-          #####################################################################
-          # TODO: implement the RMSProp update and store the parameter update #
-          # dx. Don't forget to also update step_cache[p]. Use smoothing 1e-8 #
+         
           #####################################################################
           self.step_cache[p]=decay_rate*self.step_cache[p]+(1-decay_rate)*grads[p]**2
           dx=-learning_rate*grads[p]/np.sqrt(self.step_cache[p]+smoothing) 
-          #####################################################################
-          #                      END OF YOUR CODE                             #
-          #####################################################################
         else:
           raise ValueError('Unrecognized update type "%s"' % update)
 
@@ -176,9 +172,9 @@ class RNNClassifierTrainer(object):
 
         # evaluate val accuracy
         # use all validation data if not batching
-        if not batch_val:
+        if batch_val==False:
           scores_val = loss_function(X_val, model=model,mask=val_mask,num_chars=val_chars)
-          val_loss = loss_function(X_val, y_val, model=model,mask=val_mask,num_chars=val_chars)[0]
+          val_loss,_ = loss_function(X_val, y_val, model=model,mask=val_mask,num_chars=val_chars)
           y_pred_val = np.argmax(scores_val, axis=-1)
           val_acc = np.mean(y_pred_val ==  y_val)
           val_acc_history.append(val_acc)
@@ -190,13 +186,13 @@ class RNNClassifierTrainer(object):
           #batch the validation sample
           X_val_mat,val_mask,val_num_chars,y_val_mat=prep.poem_batch_to_tensor(X_val_subset_list,y_val_subset_list)
           scores_val=loss_function(X_val_mat,model=model,mask=val_mask,num_chars=val_num_chars)
-          val_loss=loss_function(X_val_mat,y_val_mat,model=model,mask=val_mask,num_chars=val_num_chars)[0]
+          val_loss,_=loss_function(X_val_mat,y_val_mat,model=model,mask=val_mask,num_chars=val_num_chars)
           y_pred_val=np.argmax(scores_val,axis=-1)
           val_acc=np.mean(y_pred_val==y_val_mat)
           val_acc_history.append(val_acc)    
         
         # keep track of the best model based on validation accuracy
-        if val_loss > best_val_loss and epoch>0:
+        if val_loss < best_val_loss and epoch>0:
           # make a copy of the model
           best_val_loss = val_loss
           best_model = {}
@@ -205,7 +201,7 @@ class RNNClassifierTrainer(object):
           for p in model:
             best_model[p] = model[p].copy()
           #save the model if it is best
-          filename=os.path.join(checkpoint_output_dir,'checkpoint_%s_%.2f.p' % (fappend,val_loss))
+          filename=os.path.join(checkpoint_output_dir,'checkpoint_%s_%.3f.p' % (fappend,val_loss))
           print 'Saving epoch %s model to file' % epoch
           pickle.dump(best_model,open(filename,'wb'))    
 
@@ -213,7 +209,10 @@ class RNNClassifierTrainer(object):
         if verbose:
           print ('Finished epoch %d / %d: cost %f, train: %f, val %f, lr %e'
                  % (epoch, num_epochs, cost, train_acc, val_acc, learning_rate))
-
+    
+    # always save the final model
+    filename=os.path.join(checkpoint_output_dir,'finalcheckpoint_%s_%.3f.p' % (fappend,val_loss))
+    pickle.dump(model,open(filename,'wb'))             
     if verbose:
       print 'finished optimization. best validation loss: %f' % (best_val_loss)
     # return the best model and the training history statistics

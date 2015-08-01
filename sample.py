@@ -8,7 +8,8 @@ import rnn.RNN as RNN
 
 def main(params):
     #load the model
-    model=pickle.load(open(params['model'],'rb'))
+    filename=os.path.join('cv',params['model'])
+    model=pickle.load(open(filename,'rb'))
     if 'WLSTM' in model.keys():
         num_layers=1
     elif 'WLSTM1' in model.keys():
@@ -20,14 +21,14 @@ def main(params):
     for i in xrange(params['num_poems']):
         poem=RNN.LSTM_sample(model,temp=params['temp'],seed=params['seed'],num_layers=num_layers)
         poem_list.append(poem)
-    print len(poem_list)
+    
     #print poems if desired
     # 0 and 2 indicate print so this works well
     if params['output']%2==0:
         for poem in poem_list:
             print poem+'\n'
     if params['output']>0:
-        filename=os.path.join('poem',params['output_filename']+'.txt')
+        filename=os.path.join('poems',params['output_filename']+'.txt')
         with open(filename,'wb') as my_file:
             for poem in poem_list:
                 my_file.write(poem)
@@ -42,7 +43,7 @@ def main(params):
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     
-    parser.add_argument('-m','--model', dest='model', help='file path of the model to sample from', required=True)
+    parser.add_argument('-m','--model', dest='model', help='filename of model in cv folder to sample from', required=True)
     parser.add_argument('-t','--temp', dest='temp', type=float, default='1.0', help='temperature for sampling, default is 1')
     parser.add_argument('-s','--seed', dest='seed', type=str, default=None, help='a string to seed the model with when sampling')
     parser.add_argument('-n','--num_poems', dest='num_poems', type=int, default='10', help='number of poems to produce')

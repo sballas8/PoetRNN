@@ -44,9 +44,13 @@ def main(params):
     if params['init_model'] is None:
         if params['num_layers']==1:
             model=RNN.LSTM.init(vocab_size,params['hidden_size'],vocab_size)
+            #add dictionary to model
+            model['dictionary']=poem_dict
             loss_function=RNN.LSTM_cost
         elif params['num_layers']==2:
             model=RNN.LSTM.init_two_layer(vocab_size,params['hidden_size'],params['hidden_size'],vocab_size)
+            #add dictinoary to model
+            model['dictionary']=poem_dict
             loss_function=RNN.two_layer_LSTM_cost
         else:
             raise ValueError('number of layers must be either 1 or 2, not %s' % params['num_layers'])
@@ -68,8 +72,8 @@ def main(params):
                                                  update='rmsprop', sample_batches=True,batch_size=params['batch_size'],
                                                  num_epochs=params['max_epochs'], decay_after=params['decay_after'],
                                                  verbose=True,drop_prob1=params['drop_prob_layer1'],drop_prob2=params['drop_prob_layer2'],
-                                                 checkpoint_output_dir=params['checkpoint_output_dir'],max_val=params['eval_max_images'],
-                                                 fappend=params['fappend'],iter_to_update=params['iter_to_update'],dictionary=poem_dict)
+                                                 checkpoint_output_dir=params['checkpoint_output_dir'],max_val=params['eval_max'],
+                                                 fappend=params['fappend'],iter_to_update=params['iter_to_update'])
 
 if __name__ == "__main__":
     #get arguments from the command line
@@ -81,10 +85,10 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--learning_rate', dest='learning_rate', type=float, default=1e-3, help='solver learning rate')
     parser.add_argument('-c', '--regc', dest='regc', type=float, default=1e-8, help='regularization strength')
     parser.add_argument('-m', '--max_epochs', dest='max_epochs', type=int, default=50, help='number of epochs to train for')
-    parser.add_argument('--decay_rate', dest='decay_rate', type=float, default=0.999, help='decay rate for adadelta/rmsprop')
+    parser.add_argument('--decay_rate', dest='decay_rate', type=float, default=0.999, help='decay for learning rate')
     parser.add_argument('--decay_after', dest='decay_after',type=int, default=1,help='number of epochs to begin decaying learning rate after')
     parser.add_argument('-b', '--batch_size', dest='batch_size', type=int, default=100, help='batch size')
-    parser.add_argument('--eval_max_images', dest='eval_max_images', type=int, default=-1, help='for efficiency we can use a smaller number of images to get validation error')
+    parser.add_argument('--eval_max', dest='eval_max', type=int, default=-1, help='batch size for validation testing. For efficiency we can use a smaller number of samples to get validation error')
     parser.add_argument('--drop_prob_layer1', dest='drop_prob_layer1', type=float, default=0.5, help='what dropout to apply in first layer of RNN')
     parser.add_argument('--drop_prob_layer2', dest='drop_prob_layer2', type=float, default=0.5, help='what dropout to apply in second layer of RNN')
     parser.add_argument('-n','--num_layers', dest='num_layers', type=int, default=2, help='number of hidden layers. can be either 1 or two')
