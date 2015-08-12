@@ -211,8 +211,10 @@ class RNNClassifierTrainer(object):
                  % (epoch, num_epochs, cost, train_acc, val_acc, learning_rate))
     
     # always save the final model
+    final_model=model.copy()
+    final_model['dictionary']=dictionary
     filename=os.path.join(checkpoint_output_dir,'finalcheckpoint_%s_%.3f.p' % (fappend,val_loss))
-    pickle.dump(model,open(filename,'wb'))             
+    pickle.dump(final_model,open(filename,'wb'))             
     if verbose:
       print 'finished optimization. best validation loss: %f' % (best_val_loss)
     # return the best model and the training history statistics

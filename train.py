@@ -91,7 +91,7 @@ if __name__ == "__main__":
     parser.add_argument('--eval_max', dest='eval_max', type=int, default=-1, help='batch size for validation testing. For efficiency we can use a smaller number of samples to get validation error')
     parser.add_argument('--drop_prob_layer1', dest='drop_prob_layer1', type=float, default=0.5, help='what dropout to apply in first layer of RNN')
     parser.add_argument('--drop_prob_layer2', dest='drop_prob_layer2', type=float, default=0.5, help='what dropout to apply in second layer of RNN')
-    parser.add_argument('-n','--num_layers', dest='num_layers', type=int, default=2, help='number of hidden layers. can be either 1 or two')
+    parser.add_argument('-n','--num_layers', dest='num_layers', type=int, default=2, help='number of hidden layers. can be either 1 or 2')
     parser.add_argument('-t','--train_frac', dest='train_frac', type=float, default=.95, help='fraction of data in the training set, should be between 0 and 1')
     parser.add_argument('--fappend', dest='fappend', type=str, default='baseline', help='append this string to checkpoint filenames')
     parser.add_argument('--iter_to_update', dest='iter_to_update', type=int, default=1, help='how often to display progress')

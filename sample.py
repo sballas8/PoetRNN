@@ -31,7 +31,7 @@ def main(params):
         filename=os.path.join('poems',params['output_filename']+'.txt')
         with open(filename,'wb') as my_file:
             for poem in poem_list:
-                my_file.write(poem)
+                my_file.write(poem+'\n')
     
     
     
