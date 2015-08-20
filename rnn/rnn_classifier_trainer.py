@@ -92,6 +92,7 @@ class RNNClassifierTrainer(object):
           avg_time=np.mean(np.array(time_list))
           time_list=[]
           print 'Average time per batch is %.3f seconds' % avg_time
+          print 'Current training loss is %.3f' % cost
 
       # get batch of data
       if sample_batches:

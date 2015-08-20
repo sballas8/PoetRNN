@@ -1,3 +1,4 @@
 *.p
 *.DS_Store
 *.txt
+*.pyc
