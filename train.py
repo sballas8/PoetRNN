@@ -58,7 +58,7 @@ def main(params):
     else:
         model=pickle.load(open(params['init_model'],'rb'))
         if 'WLSTM' in model.keys():
-            loss_funtion=RNN.LSTM_cost
+            loss_function=RNN.LSTM_cost
             print 'Loaded one layer LSTM model'
         elif 'WLSTM1' in model.keys():
             loss_function=RNN.two_layer_LSTM_cost
